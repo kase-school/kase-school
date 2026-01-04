@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>KASE School - Login</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="login-container">
+  <h2>تسجيل الدخول</h2>
+  <input type="email" id="email" placeholder="البريد الإلكتروني">
+  <input type="password" id="password" placeholder="كلمة المرور">
+  <button onclick="login()">تسجيل الدخول بالبريد</button>
+  <button onclick="loginWithGoogle()">تسجيل الدخول باستخدام Google</button>
+  <p id="error" style="color:red;"></p>
+</div>
+
+<script src="js/firebase.js"></script>
+<script>
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const errorP = document.getElementById("error");
+
+  try {
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    redirectUser(userCredential.user);
+  } catch (err) {
+    errorP.innerText = err.message;
+  }
+}
+
+async function loginWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try {
+    const result = await auth.signInWithPopup(provider);
+    redirectUser(result.user);
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+async function redirectUser(user) {
+  const docRef = db.collection("users").doc(user.uid);
+  const docSnap = await docRef.get();
+
+  if (!docSnap.exists) {
+    await docRef.set({
+      role: "visitor",
+      name: user.displayName || "Visitor",
+      email: user.email,
+      profilePic: user.photoURL || ""
+    });
+  }
+
+  const role = docSnap.exists ? docSnap.data().role : "visitor";
+  // ابقِ في نفس الصفحة أو أرسل تنبيه
+  alert("تم تسجيل الدخول كـ " + role);
+}
+</script>
+</body>
+</html>

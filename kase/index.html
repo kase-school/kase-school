@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>KASE School - Welcome</title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <h1>KASE</h1>
+    <p>مدرسة الملك عبدالله الثاني للتميز</p>
+  </div>
+  <div class="lang-switch">
+    <button onclick="switchLang('ar')">عربي</button>
+    <button onclick="switchLang('en')">EN</button>
+  </div>
+</header>
+
+<main>
+  <div class="main-container">
+    <h2>مرحبا بكم في KASE</h2>
+    <button class="big-btn" id="guest">Continue as Guest</button>
+    <div class="auth-buttons">
+      <button id="loginBtn">تسجيل الدخول</button>
+      <button id="signupBtn">إنشاء حساب جديد</button>
+    </div>
+
+    <div id="signupOptions" class="signup-modal">
+      <h3>اختر نوع الحساب</h3>
+      <button class="optionBtn" onclick="signUp('student')">طالب</button>
+      <button class="optionBtn" onclick="signUp('teacher')">معلم</button>
+      <button onclick="closeSignup()">إغلاق</button>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 مدرسة الملك عبدالله الثاني للتميز - جميع الحقوق محفوظة</p>
+</footer>
+
+<script src="js/firebase.js"></script>
+<script>
+const guestBtn = document.getElementById("guest");
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const signupOptions = document.getElementById("signupOptions");
+
+guestBtn.onclick = () => alert("تم الدخول كزائر! وصول محدود للمحتوى");
+loginBtn.onclick = () => window.location.href = "login.html";
+signupBtn.onclick = () => { signupOptions.style.display = "block"; }
+function closeSignup(){ signupOptions.style.display="none"; }
+
+function signUp(role) {
+  const email = prompt("ادخل البريد الإلكتروني");
+  const password = prompt("ادخل كلمة المرور");
+  const name = prompt("ادخل الاسم");
+
+  if (!email || !password || !name) { alert("جميع الحقول مطلوبة"); return; }
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(async (userCredential) => {
+      const user = userCredential.user;
+      await db.collection("users").doc(user.uid).set({
+        role: role,
+        name: name,
+        email: email,
+        profilePic: ""
+      });
+      alert("تم إنشاء الحساب بنجاح كـ " + role);
+      closeSignup();
+    })
+    .catch(err => alert(err.message));
+}
+
+function switchLang(lang){
+  if(lang==='ar') alert("تم التحويل للعربية");
+  else alert("تم التحويل للإنجليزية");
+}
+</script>
+</body>
+</html>
